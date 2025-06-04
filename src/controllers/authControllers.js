@@ -1,6 +1,6 @@
-import User from "../models/User.js";
-import jwt from "jsonwebtoken";
-import {catchErrorHandler} from "../utils/errorHandlers.js";
+import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
+import {catchErrorHandler} from '../utils/errorHandlers.js';
 
 const PASSWORD_MIN_LENGTH = 6;
 const USERNAME_MIN_LENGTH = 3;
@@ -14,7 +14,7 @@ const registerController = async (req, res) => {
         const {username, email, password} = req.body;
 
         if (!username || !email || !password) {
-            return res.status(400).json({message: "All fields are required"});
+            return res.status(400).json({message: 'All fields are required'});
         }
 
         if (username.length < USERNAME_MIN_LENGTH) return res.status(400).json({message: `Username must be at least ${USERNAME_MIN_LENGTH} characters`});
@@ -35,7 +35,7 @@ const registerController = async (req, res) => {
             username,
             email,
             password,
-            profileImage
+            profileImage,
         });
 
         await user.save();
@@ -48,7 +48,8 @@ const registerController = async (req, res) => {
                 id: user._id,
                 username: user.username,
                 email: user.email,
-                profileImage: user.profileImage
+                profileImage: user.profileImage,
+                createdAt: user.createdAt
             }
         });
     } catch (err) {
@@ -59,25 +60,28 @@ const registerController = async (req, res) => {
 const loginController = async (req, res) => {
     try {
         const {email, password} = req.body;
-        if (!email || !password) return res.status(400).json({message: "All fields are required"});
 
-        //check user exist
+        if (!email || !password) return res.status(400).json({message: 'All fields are required'});
+
+        // check if user exists
         const user = await User.findOne({email});
-        if (!user) return res.status(400).json({message: "Invalid credentials"});
+        if (!user) return res.status(400).json({message: 'Invalid credentials'});
 
-        //check if password is correct
+        // check if password is correct
         const isPasswordCorrect = await user.comparePassword(password);
-        if (!isPasswordCorrect) return res.status(400).json({message: "Invalid credentials"});
+        if (!isPasswordCorrect) return res.status(400).json({message: 'Invalid credentials'});
 
         const token = generateToken(user._id);
 
-        res.status(201).json({
-            token, user: {
+        res.status(200).json({
+            token,
+            user: {
                 id: user._id,
                 username: user.username,
                 email: user.email,
-                profileImage: user.profileImage
-            }
+                profileImage: user.profileImage,
+                createdAt: user.createdAt
+            },
         });
     } catch (err) {
         catchErrorHandler(res, err);

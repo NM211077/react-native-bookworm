@@ -2,7 +2,7 @@ import cloudinary from "../lib/cloudinary.js";
 import Book from "../models/Book.js";
 import {catchErrorHandler} from "../utils/errorHandlers.js";
 
-const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT = 2;
 const createBookPost = async (req, res) => {
     try {
         const {title, caption, image, rating} = req.body;
@@ -11,6 +11,7 @@ const createBookPost = async (req, res) => {
         //upload img to cloudinary
         const uploadResponse = await cloudinary.uploader.upload(image);
         const imageUrl = uploadResponse.secure_url;
+
         //save to db
         const newBook = new Book({
             title,
@@ -48,7 +49,6 @@ const getAllBooks = async (req, res) => {
             totalBooks,
             totalPages: Math.ceil(totalBooks / limit)
         })
-
     } catch (err) {
         catchErrorHandler(res, err);
     }
