@@ -80,7 +80,7 @@ const deleteBook = async (req, res) => {
 
 const getRecommendedBooks = async (req, res) => {
     try {
-        const books = await Book.find({user: req.params.user}).sort({createdAt: -1});
+        const books = await Book.find({ user: req.user._id }).sort({ createdAt: -1 });
         res.json(books);
     } catch (err) {
         catchErrorHandler(res, err);
