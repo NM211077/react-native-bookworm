@@ -1,0 +1,7 @@
+{"level":"info","message":"Server started on port 3000!","timestamp":"2025-06-10 18:28:33"}
+{"level":"info","message":"Server started on port 3000!","timestamp":"2025-06-10 18:28:39"}
+{"level":"info","message":"POST /api/auth/login 200 - 113ms","timestamp":"2025-06-10 18:32:17"}
+{"level":"info","message":"GET /api/books?page=2&limit=2 304 - 189ms","timestamp":"2025-06-10 18:32:20"}
+{"level":"info","message":"GET /api/books/user 304 - 85ms","timestamp":"2025-06-10 18:32:22"}
+{"level":"info","message":"POST /api/books 201 - 3025ms","timestamp":"2025-06-10 18:33:25"}
+{"level":"info","message":"GET /api/books?page=1&limit=2 200 - 172ms","timestamp":"2025-06-10 18:33:36"}
