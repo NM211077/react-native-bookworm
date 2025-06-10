@@ -12,8 +12,8 @@ import { config } from './config/config.js';
 const app = express();
 const PORT = config.port;
 
-job.start();
 
+job.start();
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100, 
@@ -24,6 +24,8 @@ app.use(helmet());
 app.use(limiter); 
 app.use(express.json({ limit: "50mb" }));
 app.use(cors());
+
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/books', booksRoutes);
