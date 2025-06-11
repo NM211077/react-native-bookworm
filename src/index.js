@@ -32,13 +32,14 @@ app.use(cors());
 app.use(requestLogger);
 
 // Routes
+
 app.use('/api/auth', authRoutes);
 app.use('/api/books', booksRoutes);
 
 // Error handling
 app.use(errorLogger);
 app.use((err, req, res, next) => {
-    logger.error('Unhandled error:', err);
+    console.error(err.stack);
     res.status(500).json({
         success: false,
         message: 'Something went wrong!',
@@ -47,16 +48,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const startServer = async () => {
-    try {
-        await connectDB();
-        app.listen(PORT, () => {
-            logger.info(`Server started on port ${PORT}!`);
-        });
-    } catch (error) {
-        logger.error('Failed to start server:', error);
-        process.exit(1);
-    }
-};
-
-startServer();
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}!`);
+    connectDB();
+});

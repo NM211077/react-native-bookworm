@@ -24,7 +24,7 @@ export const config = {
                 maxLength: 100
             },
             caption: {
-                minLength: 10,
+                minLength: 2,
                 maxLength: 1000
             },
             rating: {

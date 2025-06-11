@@ -1,12 +1,12 @@
 import cloudinary from "../lib/cloudinary.js";
 import Book from "../models/Book.js";
-import {catchErrorHandler} from "../utils/errorHandlers.js";
+import { catchErrorHandler } from "../utils/errorHandlers.js";
+import { BOOKS_CONFIG } from "../config/books.config.js";
 
-const DEFAULT_LIMIT = 2;
 const createBookPost = async (req, res) => {
     try {
-        const {title, caption, image, rating} = req.body;
-        if (!title || !caption || !image || !rating) return res.status(400).json({message: 'Please provide all fields'});
+        const { title, caption, image, rating } = req.body;
+        if (!title || !caption || !image || !rating) return res.status(400).json({ message: 'Please provide all fields' });
 
         //upload img to cloudinary
         const uploadResponse = await cloudinary.uploader.upload(image);
@@ -28,15 +28,16 @@ const createBookPost = async (req, res) => {
         catchErrorHandler(res, err);
     }
 };
+
 const getAllBooks = async (req, res) => {
     //pagination => infinity scroll
     try {
-        const page = req.query.page || 1;
-        const limit = req.query.limit || DEFAULT_LIMIT;
+        const page = req.query.page || BOOKS_CONFIG.DEFAULT_PAGE_NUM;
+        const limit = req.query.limit || BOOKS_CONFIG.DEFAULT_LIMIT;
         const skip = (page - 1) * limit;
 
         const books = await Book.find()
-            .sort({createdAt: -1})
+            .sort({ [BOOKS_CONFIG.SORT_OPTIONS.CREATED_AT]: BOOKS_CONFIG.SORT_ORDERS.DESC })
             .skip(skip)
             .limit(limit)
             .populate('user', 'username profileImage');
@@ -48,19 +49,19 @@ const getAllBooks = async (req, res) => {
             currentPage: page,
             totalBooks,
             totalPages: Math.ceil(totalBooks / limit)
-        })
+        });
     } catch (err) {
         catchErrorHandler(res, err);
     }
-}
+};
 
 const deleteBook = async (req, res) => {
     try {
         const book = await Book.findById(req.params.id);
-        if (!book) return res.status(404).json({message: 'Book not found'});
+        if (!book) return res.status(404).json({ message: 'Book not found' });
 
         //check if user is creator it book
-        if (book.user.toString() !== req.user._id.toString()) return res.status(401).json({message: 'Unauthorized'});
+        if (book.user.toString() !== req.user._id.toString()) return res.status(401).json({ message: 'Unauthorized' });
 
         //delete image from cloudinary
         if (book.image && book.image.includes('cloudinary')) {
@@ -72,19 +73,20 @@ const deleteBook = async (req, res) => {
             }
         }
         await book.deleteOne();
-        res.status(200).json({message: 'Book deleted successfully'});
+        res.status(200).json({ message: 'Book deleted successfully' });
     } catch (err) {
         catchErrorHandler(res, err);
     }
-}
+};
 
 const getRecommendedBooks = async (req, res) => {
     try {
-        const books = await Book.find({ user: req.user._id }).sort({ createdAt: -1 });
+        const books = await Book.find({ user: req.user._id })
+            .sort({ [BOOKS_CONFIG.SORT_OPTIONS.CREATED_AT]: BOOKS_CONFIG.SORT_ORDERS.DESC });
         res.json(books);
     } catch (err) {
         catchErrorHandler(res, err);
     }
-}
+};
 
-export {createBookPost, getAllBooks, deleteBook, getRecommendedBooks}
+export { createBookPost, getAllBooks, deleteBook, getRecommendedBooks };
