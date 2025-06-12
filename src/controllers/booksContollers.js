@@ -30,19 +30,50 @@ const createBookPost = async (req, res) => {
 };
 
 const getAllBooks = async (req, res) => {
-    //pagination => infinity scroll
     try {
-        const page = req.query.page || BOOKS_CONFIG.DEFAULT_PAGE_NUM;
-        const limit = req.query.limit || BOOKS_CONFIG.DEFAULT_LIMIT;
+        const page = parseInt(req.query.page) || BOOKS_CONFIG.DEFAULT_PAGE_NUM;
+        const limit = parseInt(req.query.limit) || BOOKS_CONFIG.DEFAULT_LIMIT;
         const skip = (page - 1) * limit;
 
-        const books = await Book.find()
-            .sort({ [BOOKS_CONFIG.SORT_OPTIONS.CREATED_AT]: BOOKS_CONFIG.SORT_ORDERS.DESC })
-            .skip(skip)
-            .limit(limit)
-            .populate('user', 'username profileImage');
+        const sortBy = req.query.sortBy || 'createdAt';
+        const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
 
-        const totalBooks = await Book.countDocuments(books);
+        const pipeline = [
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            { $unwind: '$user' },
+            {
+                $sort: {
+                    [sortBy === 'username' ? 'user.username' : sortBy]: sortOrder
+                }
+            },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $project: {
+                    title: 1,
+                    caption: 1,
+                    image: 1,
+                    rating: 1,
+                    createdAt: 1,
+                    user: {
+                        _id: '$user._id',
+                        username: '$user.username',
+                        profileImage: '$user.profileImage'
+                    }
+                }
+            }
+        ];
+
+        const books = await Book.aggregate(pipeline);
+
+        const totalBooks = await Book.countDocuments();
 
         res.send({
             books,
